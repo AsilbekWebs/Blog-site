@@ -10,16 +10,18 @@ from .models import Post
 from .serializer import PostSerializer
 
 
+
 class CustomPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 100
 
 
+
 class PostListCreateAPIView(APIView):
 
     def get(self, request):
-        posts = Post.objects.all().order_by('-created_at')
+        posts = Post.objects.all().prefetch_related('comments', 'likes').order_by('-created_at')
 
 
         search_query = request.query_params.get('search', None)
@@ -35,7 +37,7 @@ class PostListCreateAPIView(APIView):
         if author_id:
             posts = posts.filter(author_id=author_id)
 
-
+        
         paginator = CustomPagination()
         paginated_posts = paginator.paginate_queryset(posts, request)
 
@@ -47,7 +49,6 @@ class PostListCreateAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Post yaratish uchun tizimga kiring!"},
@@ -59,6 +60,7 @@ class PostListCreateAPIView(APIView):
             serializer.save(author=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PostDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
