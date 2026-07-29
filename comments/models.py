@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from interactions.models import Post  # <--- Post modelini interactions app'dan olamiz
+from interactions.models import Post
 
 
 class Comment(models.Model):
@@ -20,7 +20,7 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('post', 'user')  # Bitta foydalanuvchi bitta postga max 1 marta layk bosa oladi
+        unique_together = ('post', 'user')
 
     def __str__(self):
         return f"{self.user.username} liked {self.post.title}"
